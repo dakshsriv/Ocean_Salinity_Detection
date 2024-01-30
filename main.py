@@ -27,15 +27,14 @@ print(tf.__version__)
 
 # For sss
 
-sss_csv = 'noaa_aoml_19fa_f217_8e36_c7ba_c5e0_5983.csv'
-sst_csv = 'erdMH1sstd8dayR20190SQ_2f2d_cfb8_a7d1.csv'
+in_file = 'data_to_use/day1.csv'
 
-df = pd.read_csv(sss_csv)
-data_lst = df.values.tolist()
-df = pd.read_csv(sst_csv)
+df = pd.read_csv(in_file)
 data_list = df.values.tolist()
-out_x_list = []
-out_y_list = []
+#print(data_list)
+out_x_list = [x[0] for x in data_list]
+out_y_list = [x[1] for x in data_list]
+print(len(data_list))
 """
 data_lst = df.values.tolist()
 
@@ -71,12 +70,7 @@ for a in sst_data_list: # a is sst, l is sss
             out_y_list.append(float(k[3])) # sss
 """
 
-for a, b in zip(data_lst, data_list): #a: sss, b: sst
-    print(a, b)
-    out_x_list.append(float(a[3])) # sst
-    out_y_list.append(float(k[3]))
 
-quit()
 #print(f'out_x_list is {out_x_list}, out_y_list is {out_y_list}, lengths are {len(out_x_list)}, {len(out_y_list)}')
 
 trainRatio = 0.8
@@ -111,15 +105,15 @@ sst_model = tf.keras.Sequential([
 sst_model.summary()
 
 sst_model.compile(
-    optimizer=tf.keras.optimizers.Adam(learning_rate=0.1),
+    optimizer=tf.keras.optimizers.Adam(learning_rate=0.02),
     loss='mean_absolute_error')
 
 history = sst_model.fit(
     training_x,
     training_y,
-    epochs=200,
+    epochs=50,
     # Suppress logging.
-    verbose=0,
+    verbose=2,
     # Calculate validation results on 20% of the training data.
     validation_data=(validation_x, validation_y))
 
@@ -129,13 +123,13 @@ test_results['sst_model'] = sst_model.evaluate(
     testing_x,
     testing_y, verbose=0)
 
-print(testing_y)
+#print(testing_y)
 inlist = [x[0] for x in testing_y]
 print(min(inlist), max(inlist))
 rmse = test_results['sst_model']
-print('Normalized RMSE: ', rmse/(max(inlist) - min(inlist)))
+print(rmse, 'Normalized RMSE: ', rmse/(max(inlist) - min(inlist)))
 
-print(test_results)
+#print(test_results)
 hist = pd.DataFrame(history.history)
 hist['epoch'] = history.epoch
 hist.tail()
