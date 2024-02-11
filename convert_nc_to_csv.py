@@ -5,6 +5,7 @@ import xarray as xr
 import numpy as np
 import pandas as pd
 from pprint import pprint
+import ast
 """
 https://climate.esa.int/en/odp/#/dashboard
 
@@ -34,9 +35,13 @@ def proper_round(num, dec=0):
 
 sss_indir = 'sss-outdir/'
 sst_indir = 'sst-outdir/'
-sst_outdir = 'sst-csv-sst_indir/'
-sss_outdir = 'sss-csv-sst_indir/'
-var = 'sst' # 'SALT' for SSS, sst for SST
+chl_indir = 'chl-outdir/'
+
+sst_outdir = 'sst-csv-dir/'
+sss_outdir = 'sss-csv-dir/'
+chl_outdir = 'chl-csv-dir/'
+
+var = 'sst' # 'SALT' for SSS, sst for SST, chlor_a for Chl-a
 
 if var == 'sst':
     print('open')
@@ -54,30 +59,51 @@ if var == 'sst':
     sst_onlyfiles = [f for f in listdir(sst_indir) if isfile(sst_indir + f) and f[-2:]=="nc"]
     print(isfile(sss_indir + listdir(sss_indir)[0]) and listdir(sss_indir)[0][-2:]=="nc")
     sss_onlyfiles = [f for f in listdir(sss_indir) if isfile(sss_indir + f) and f[-2:]=="nc"]
+    chla_onlyfiles = [f for f in listdir(chl_indir) if isfile(chl_indir + f) and f[-2:]=="nc"]
+    print(chla_onlyfiles)
+
     print(sst_onlyfiles, sss_onlyfiles)
-    for (f, g) in zip(sst_onlyfiles, sss_onlyfiles):
+    for (f, g, h) in zip(sst_onlyfiles, sss_onlyfiles, chla_onlyfiles):
         #print(f'starting {sst_indir + f}')
         sst_data = xr.open_dataset(sst_indir + f)
         sss_data = xr.open_dataset(sss_indir + g)
+        chla_data = xr.open_dataset(chl_indir + h)
 
         #pprint(sss_data.values.to_dataframe())
         sst_dfs = sst_data['sst'].to_dataframe()
         sss_dfs = sss_data['SALT'].to_dataframe()
+        chla_dfs = chla_data['chlor_a'].to_dataframe()
+
         print('got dataframes')
         sst_dfs.dropna()
         sss_dfs.dropna()
+        chla_dfs.dropna()
         print('dropped null values')
 
         sss_index = sss_dfs.index.tolist()
         sst_index = sst_dfs.index.tolist()
+        #preparing('chla conversion')
+        
+        chla_index = []
+        with open('chl-index.txt', 'r') as f:
+            for l in f:
+                print(type(l))
+                chla_index = output = ast.literal_eval(l)
 
+        #chla_index = chla_dfs.index.tolist()
+
+  
         print('got indexes')
 
+        
         sss_values = sss_dfs.values.tolist()
         sst_values = sst_dfs.values.tolist()
-
+        chla_values = chla_dfs.values.tolist()
+        with open('chl-values.txt', 'w') as f:
+            f.write(str(chla_values))
         sst_dfs.iloc[0:0]
         sss_dfs.iloc[0:0]
+        
         print('got values')
 
         sss_d = [] 
@@ -87,14 +113,15 @@ if var == 'sst':
         #print(sst_df)
         #quit()
         #print('converted sst data to list')
+        print('doing obscure loop')
         for (x, y) in zip(sss_index, sss_values):
             #print(x, y, list(x)+list(y))
+            print(x, y)
             if x[1] < -10:
                 break
             sss_d.append([list(x)[2],list(x)[3],list(y)[0]])
         sss_df = sss_d
         #pprint(sss_df)
-        #quit()
         #print('l')
 #        print(sss_df.values.tolist())
         #sss_df = [list(x)+list(y) for (x, y) in zip(sss_df.index.tolist(), sss_df.values.tolist())]
