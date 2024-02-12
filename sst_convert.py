@@ -42,9 +42,9 @@ def proper_round(num, dec=0):
     return float(num[:-1])
 
 
-sss_indir = 'sss-outdir/'
+sst_indir = 'sst-outdir/'
 
-sss_outdir = 'sss-csv-dir'
+sst_outdir = 'sst-csv-dir'
 
 
 var = 'sst' # 'SALT' for SSS, sst for SST, chlor_a for Chl-a
@@ -52,13 +52,13 @@ var = 'sst' # 'SALT' for SSS, sst for SST, chlor_a for Chl-a
 if var == 'sst':
     print('open')
     # use glob
-    sss_onlyfiles = [f for f in listdir(sss_outdir) if isfile(sss_outdir + f) and f[-3:]=="csv"]
-    sss_in = sss_onlyfiles = [f for f in listdir(sss_indir) if isfile(sss_indir + f) and f[-2:]=="nc"]
+    sst_onlyfiles = [f for f in listdir(sst_outdir) if isfile(sst_outdir + f) and f[-3:]=="csv"]
+    sst_in = sst_onlyfiles = [f for f in listdir(sst_indir) if isfile(sst_indir + f) and f[-2:]=="nc"]
 
-    print(f'Count of files in dir: {len(sss_onlyfiles)}')
+    print(f'Count of files in dir: {len(sst_onlyfiles)}')
 
-    for (h, i) in zip(sss_in, sss_onlyfiles):
-        curr_datafile = os.path.join(sss_outdir, i)
+    for (h, i) in zip(sst_in, sst_onlyfiles):
+        curr_datafile = os.path.join(sst_outdir, i)
 
         #sst_dfs = pd.read_csv(curr_datafile)
 
@@ -70,11 +70,11 @@ if var == 'sst':
         chla_dfs = chla_data['chlor_a'].to_dataframe()"""
 
         print('got dataframes')
-        sss_data = xr.open_dataset(sss_indir + h)['SALT']
-        sss_data.to_dataframe().to_csv(curr_datafile)
+        sst_data = xr.open_dataset(sst_indir + h)['sst']
+        sst_data.to_dataframe().to_csv(curr_datafile)
         print('converted to csv')
-        sss_dfs = pd.read_csv(curr_datafile)
-        sss_dfs.dropna()
+        sst_dfs = pd.read_csv(curr_datafile)
+        sst_dfs.dropna()
         print('dropped null values')
 
 
@@ -104,27 +104,24 @@ if var == 'sst':
         print('preparing to merge data')
         ctr = 0
 
-        for x in sss_dfs.values: #SST: 0.875, 0.625, 0.375, 0.125 SSS: 0.75, 0.25
-             # Data structure of x: [nan, Timestamp('2012-01-16 00:00:00'), -90.0, -180.0, 0.0, nan]
+        for x in sst_dfs.values: #SST: 0.875, 0.625, 0.375, 0.125 SSS: 0.75, 0.25
+            print(x) # Data structure of x: [nan, Timestamp('2012-01-16 00:00:00'), -90.0, -180.0, 0.0, nan]
 
             ctr+=1
             if ctr == 1:
                 continue
             if np.isnan(x[4]):
                 continue
-            if x[1] != -5:
-                continue
             #pprint(x)
-            print(x)
             time = x[0]
             lat = float(x[2])
             lon = float(x[3])
 
 
             #date_ = x[0]
-            sss = x[4]
+            sst = x[4]
             print(x[4])
-            cur.execute("INSERT INTO salinity (s_date, s_lat, s_lon, s_value) VALUES (?, ?, ?, ?)", (time, lat, lon, sss))
+            cur.execute("INSERT INTO temperature (t_date, t_lat, t_lon, t_value) VALUES (?, ?, ?, ?)", (time, lat, lon, sst))
             """ctr += 1
             if ctr == 100:
                 print(x)

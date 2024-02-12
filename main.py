@@ -23,18 +23,28 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 
+import sqlite3
+
+conn = sqlite3.connect("data.db")
+cur = conn.cursor()
+
 print(tf.__version__)
 
 # For sss
 
-in_file = 'data_to_use/day1.csv'
+# SELECT DISTINCT sst, chla, sss FROM combined;
 
-df = pd.read_csv(in_file)
-data_list = df.values.tolist()
+#in_file = 'data_to_use/day1.csv'
+
+#df = pd.read_csv(in_file)
+#data_list = df.values.tolist()
 #print(data_list)
-out_x_list = [x[0] for x in data_list]
-out_y_list = [x[1] for x in data_list]
-print(len(data_list))
+
+cur.execute('SELECT * FROM triples;')
+data = cur.fetchall()
+print(data)
+out_x_list = [[x[0], x[1]] for x in data]
+out_y_list = [x[2] for x in data]
 """
 data_lst = df.values.tolist()
 
@@ -94,7 +104,7 @@ print(f'input_shape is {input_shape}')
 normalizer.adapt(training_x)
 
 print(training_y)
-sst_normalizer = layers.Normalization(input_shape=[1,], axis=None)
+sst_normalizer = layers.Normalization(input_shape=[1, 2,], axis=None)
 sst_normalizer.adapt(training_y)
 
 sst_model = tf.keras.Sequential([
@@ -102,6 +112,7 @@ sst_model = tf.keras.Sequential([
     layers.Dense(units=1)
 ])
 
+print(training_y.shape)
 sst_model.summary()
 
 sst_model.compile(
@@ -143,5 +154,5 @@ plt.legend()
 plt.grid(True)
 plt.show()
 
-y = sst_model.predict([[36]])
+y = sst_model.predict([[[20.34, 0.12058]]])
 print('Prediction for ', 26, ' is ', y)
