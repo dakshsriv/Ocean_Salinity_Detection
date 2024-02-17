@@ -4,7 +4,8 @@ import numpy as np
 import math
 import pandas as pd
 import seaborn as sns
-
+import tensorflow_probability as tfp
+from sklearn.metrics import r2_score
 """
 Get data from:
 - Run this command for SSS: podaac-data-downloader -c ECCO_L4_TEMP_SALINITY_05DEG_DAILY_V4R4 -d sss-outdir -sd 2012-01-01T00:00:00Z -ed 2018-01-01T00:00:00Z
@@ -91,7 +92,7 @@ test_split_mark = int(trainRatio*len(out_x_list)) + 1
 # x is labels, y is features
 
 (training_x, training_y, validation_x, validation_y, testing_x, testing_y) = ([ [x] for x in out_x_list[:validation_split_mark]], [ [x] for x in out_y_list[:validation_split_mark]], [ [x] for x in out_x_list[validation_split_mark:test_split_mark]], [[x] for x in out_y_list[validation_split_mark:test_split_mark]], [[x] for x in out_x_list[test_split_mark:]], [[x] for x in out_y_list[test_split_mark:]])
-print(training_x)
+#print(training_x)
 
 (training_x, training_y, validation_x, validation_y, testing_x, testing_y) = (np.array(training_x), np.array(training_y), np.array(validation_x), np.array(validation_y), np.array(testing_x), np.array(testing_y))
 
@@ -112,7 +113,7 @@ sst_model = tf.keras.Sequential([
     layers.Dense(units=1)
 ])
 
-print(training_y.shape)
+#print(training_y.shape)
 sst_model.summary()
 
 sst_model.compile(
@@ -122,7 +123,7 @@ sst_model.compile(
 history = sst_model.fit(
     training_x,
     training_y,
-    epochs=50,
+    epochs=20,
     # Suppress logging.
     verbose=2,
     # Calculate validation results on 20% of the training data.
@@ -134,6 +135,26 @@ test_results['sst_model'] = sst_model.evaluate(
     testing_x,
     testing_y, verbose=0)
 
+
+
+
+only_sst_data = [x[0][0] for x in training_x]
+only_chla_data = [x[0][1] for x in training_x]
+
+#r2 = r2_score(only_sst_data, training_y)
+print('r2 value: ', )
+#print(training_y)
+print(np.array(only_sst_data).shape, training_y.shape, only_sst_data[0])
+plt.scatter(only_sst_data, training_y)
+plt.show()
+plt.scatter(only_chla_data, training_y)
+plt.show()
+quit()
+
+
+
+
+
 #print(testing_y)
 inlist = [x[0] for x in testing_y]
 print(min(inlist), max(inlist))
@@ -144,7 +165,7 @@ print(rmse, 'Normalized RMSE: ', rmse/(max(inlist) - min(inlist)))
 hist = pd.DataFrame(history.history)
 hist['epoch'] = history.epoch
 hist.tail()
-
+"""
 plt.plot(history.history['loss'], label='loss')
 plt.plot(history.history['val_loss'], label='val_loss')
 plt.ylim([0, 10])
@@ -153,6 +174,12 @@ plt.ylabel('Error [sss]')
 plt.legend()
 plt.grid(True)
 plt.show()
-
+"""
 y = sst_model.predict([[[20.34, 0.12058]]])
 print('Prediction for ', 26, ' is ', y)
+
+
+
+
+cov = tfp.stats.covariance([x[0] for x in y for y in training_x], training_y, sample_axis=0, event_axis=None)
+print(list(cov))
