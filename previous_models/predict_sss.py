@@ -46,13 +46,13 @@ print(tf.__version__)
 cur.execute('SELECT * FROM triples;')
 data = cur.fetchall()
 print(data)
-out_x_list = [[x[0], x[2]] for x in data]
-out_y_list = [x[1] for x in data]
+out_x_list = [[x[0], x[1]] for x in data]
+out_y_list = [x[2] for x in data]
 
 cur2.execute('SELECT * FROM triples;')
 data2 = cur.fetchall()
-out_x_list2 = [[x[0], x[2]] for x in data]
-out_y_list2 = [x[1] for x in data]
+out_x_list2 = [[x[0], x[1]] for x in data]
+out_y_list2 = [x[2] for x in data]
 
 
 """
@@ -111,7 +111,30 @@ test_split_mark = int(trainRatio*len(out_x_list)) + 1
 testing_x = [[x] for x in out_x_list2]
 testing_y = [[x] for x in out_y_list2]
 
+only_sst_data = [x[0][0] for x in training_x]
+only_chla_data = [x[0][1] for x in training_x]
 
+plt.scatter(only_sst_data, training_y)
+plt.title(" SST vs SSS")
+plt.xlabel("sst (degrees C)")
+plt.ylabel("sss (ppm)")
+plt.show()
+plt.scatter(only_chla_data, training_y, s=1)
+plt.title("Chl-a vs SSS")
+plt.xlim([0, 2.5])
+
+"""
+z = np.polyfit(only_chla_data, training_y, 1)
+print(z)
+p = np.poly1d(z)"""
+
+plt.xlabel("chl-a (mg/m^3)")
+plt.ylabel("sss (ppm)")
+plt.show()
+
+
+
+quit()
 
 
 
@@ -127,25 +150,25 @@ print(f'input_shape is {input_shape}')
 normalizer.adapt(training_x)
 
 print(training_y)
-chl_normalizer = layers.Normalization(input_shape=[1, 2,], axis=None)
-chl_normalizer.adapt(training_y)
+sst_normalizer = layers.Normalization(input_shape=[1, 2,], axis=None)
+sst_normalizer.adapt(training_y)
 
-chl_model = tf.keras.Sequential([
-    chl_normalizer,
+sst_model = tf.keras.Sequential([
+    sst_normalizer,
     layers.Dense(units=1)
 ])
 
 #print(training_y.shape)
-chl_model.summary()
+sst_model.summary()
 
-chl_model.compile(
-    optimizer=tf.keras.optimizers.Adam(learning_rate=0.002),
+sst_model.compile(
+    optimizer=tf.keras.optimizers.Adam(learning_rate=0.02),
     loss='mean_absolute_error')
 
-history = chl_model.fit(
+history = sst_model.fit(
     training_x,
     training_y,
-    epochs=40,
+    epochs=20,
     # Suppress logging.
     verbose=2,
     # Calculate validation results on 20% of the training data.
@@ -153,7 +176,7 @@ history = chl_model.fit(
 
 test_results = {}
 
-test_results['sst_model'] = chl_model.evaluate(
+test_results['sst_model'] = sst_model.evaluate(
     testing_x,
     testing_y, verbose=0)
 
@@ -179,8 +202,7 @@ print(rmse, 'Normalized RMSE: ', rmse/(max(inlist) - min(inlist)))
 hist = pd.DataFrame(history.history)
 hist['epoch'] = history.epoch
 hist.tail()
-
-#"""
+"""
 plt.plot(history.history['loss'], label='loss')
 plt.plot(history.history['val_loss'], label='val_loss')
 plt.ylim([0, 10])
@@ -189,9 +211,8 @@ plt.ylabel('Error [sss]')
 plt.legend()
 plt.grid(True)
 plt.show()
-#"""
-
+"""
 print(np.array(testing_x[0]).shape)
-#y = chl_model.predict(testing_x[0])
-#print('Prediction for ', 26, ' is ', y)
+y = sst_model.predict(testing_x[0])
+print('Prediction for ', 26, ' is ', y)
 
