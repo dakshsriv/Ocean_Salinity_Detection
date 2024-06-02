@@ -8,8 +8,8 @@ import pandas as pd
 from pprint import pprint
 import ast
 import sqlite3
-
-conn = sqlite3.connect("data.db")
+db = input('What database to write to? ')
+conn = sqlite3.connect(db)
 cur = conn.cursor()
 
 
@@ -52,6 +52,7 @@ if var == 'sst':
     print('open')
     # use glob
     chla_onlyfiles = [f for f in listdir(chl_indir) if isfile(chl_indir + f) and f[-3:]=="csv"]
+
 
     print(f'Count of files in dir: {len(chla_onlyfiles)}')
 

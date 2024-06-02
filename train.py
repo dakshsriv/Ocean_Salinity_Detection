@@ -49,9 +49,6 @@ data2 = cur.fetchall()
 out_x_list2 = [[x[0], x[2]] for x in data]
 out_y_list2 = [x[1] for x in data]
 
-out_x_list = out_x_list + out_x_list2
-out_y_list = out_y_list + out_y_list2
-
 trainRatio = 0.8
 validationSplit = 0.8
 validation_split_mark = int(validationSplit*trainRatio*len(out_x_list)) + 1
@@ -75,6 +72,13 @@ print('Correlation between SSS and Chl-a:', tfp.stats.correlation(
 
 only_sst_data = [x[0][0] for x in training_x]
 only_sss_data = [x[0][1] for x in training_x]
+
+
+plt.scatter(only_sst_data, only_sss_data, s=1)
+plt.title("SSS vs SST")
+plt.xlabel("sst (degrees Celsius)")
+plt.ylabel("sss (ppt)")
+plt.show()
 
 (training_x, training_y, validation_x, validation_y, testing_x, testing_y) = (np.array(training_x), np.array(training_y), np.array(validation_x), np.array(validation_y), np.array(testing_x), np.array(testing_y))
 
@@ -130,15 +134,16 @@ hist['epoch'] = history.epoch
 hist.tail()
 
 #"""
-plt.plot(history.history['loss'], label='loss')
-plt.plot(history.history['val_loss'], label='val_loss')
-#plt.ylim([0, 7])
+plt.plot([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], history.history['loss'], label='loss')
+plt.plot([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], history.history['val_loss'], label='val_loss')
+plt.xticks(np.arange(1, 11, step=1))
+print(history.history['val_loss'])
 plt.xlabel('Epoch')
 plt.ylabel('Error [mg/m3 Chl-a]')
-#plt.ylim([0, 2])
+#plt.ylim([0, 4])
 plt.legend()
 plt.grid(True)
-#plt.show()
+plt.show()
 #"""
 
 # Current SSS: 35.1

@@ -9,8 +9,8 @@ import pandas as pd
 from pprint import pprint
 import ast
 import sqlite3
-
-conn = sqlite3.connect("data.db")
+db = input('What database to write to? ')
+conn = sqlite3.connect(db)
 cur = conn.cursor()
 
 
@@ -55,6 +55,10 @@ if var == 'sst':
     sss_onlyfiles = [f for f in listdir(sss_outdir) if isfile(sss_outdir + f) and f[-3:]=="csv"]
     sss_in = sss_onlyfiles = [f for f in listdir(sss_indir) if isfile(sss_indir + f) and f[-2:]=="nc"]
 
+    sss_onlyfiles = [sss_onlyfiles[0]]
+    sss_in = [sss_in[0]]
+    
+    
     print(f'Count of files in dir: {len(sss_onlyfiles)}')
 
     for (h, i) in zip(sss_in, sss_onlyfiles):

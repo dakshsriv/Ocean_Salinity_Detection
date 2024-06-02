@@ -15,6 +15,6 @@ from tensorflow.keras import layers
 
 chl_model = keras.models.load_model("chl_model.keras")
 
-test = [12.406, 32.224] #SST, SSS
+test = [21.90928951, 36.64385559] #SST, SSS
 y = chl_model.predict(test)[0][0]
 print('Prediction for ', test, ' is ', y)

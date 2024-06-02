@@ -10,7 +10,8 @@ from pprint import pprint
 import ast
 import sqlite3
 
-conn = sqlite3.connect("data.db")
+db = input('What database to write to? ')
+conn = sqlite3.connect(db)
 cur = conn.cursor()
 
 
@@ -52,8 +53,14 @@ var = 'sst' # 'SALT' for SSS, sst for SST, chlor_a for Chl-a
 if var == 'sst':
     print('open')
     # use glob
+    
     sst_onlyfiles = [f for f in listdir(sst_outdir) if isfile(sst_outdir + f) and f[-3:]=="csv"]
-    sst_in = sst_onlyfiles = [f for f in listdir(sst_indir) if isfile(sst_indir + f) and f[-2:]=="nc"]
+    sst_in = sst_onlyfiles = [f for f in listdir(sst_indir) if isfile(sst_indir +  f) and f[-2:]=="nc"]
+
+
+    sst_onlyfiles = [sst_onlyfiles[0]]
+    sst_in = [sst_in[0]]
+
 
     print(f'Count of files in dir: {len(sst_onlyfiles)}')
 
